@@ -1,0 +1,63 @@
+{# Entities macros #}
+
+{% macro render_slot(slot, meaning="") %}
+<span class="slot" data-id="{{ slot | slot_id }}" data-meaning="{{ meaning }}">{{ slot }}</span>
+{% endmacro %}
+
+{% macro render_expr(expr, meaning="") %}
+<span class="expr" data-id="{{ expr | entity_id }}" data-meaning="{{ meaning }}">{{ expr | entity }}</span>
+{% endmacro %}
+
+{% macro render_stage(node) %}
+<span class="stage" data-id="{{ node.stageId | entity_id }}">{{ node.stageId | entity }}</span>
+{% endmacro %}
+
+{# Stages macros #}
+
+{% macro render_filter(node, level) %}
+    {{ render_stage(node) }} {{ render_expr(node.filter, "Filter expression") }}
+{{ render_node(node.children[0], level) }}
+{% endmacro %}
+
+{# TODO laplab: Handle missing limit. Handle skip. #}
+{% macro render_limit(node, level) %}
+    {{ render_stage(node) }} {{ node.limit }}
+{{ render_node(node.children[0], level) }}
+{% endmacro %}
+
+{% macro render_coscan(node, level) %}
+    {{ render_stage(node) }}
+{% endmacro %}
+
+{% macro render_project(node, level) %}
+    {{ render_stage(node) }}
+    {% for slot, expr in node.projections.items() %}
+        {{ render_slot(slot) }} = {{ render_expr(expr) }}
+    {% endfor %}
+{% endmacro %}
+
+{# TODO laplab: Handle missing expressions. -#}
+{# TODO laplab: Handle correlated slots. -#}
+{% macro render_traverse(node, level) %}
+    {{ render_stage(node) }}
+        {{ render_slot(node.inputSlot, "Input value and current array element") }}
+        {{ render_slot(node.outputSlot, "Output value") }}
+        {{ render_slot(node.outputSlotInner, "Output from the inner side") }}
+        {{ render_expr(node.fold, "Fold expression") }}
+        {{ render_expr(node.final, "Final expression") }}
+    from
+{{ render_node(node.children[0], level + 2) }}
+    in
+{{ render_node(node.children[1], level + 2) }}
+{% endmacro %}
+
+{% macro render_node(node, level) %}
+{% set macro_name = 'render_' + (node.stageId | entity) %}
+{{ macro_name | call_macro_by_name(node, level) | my_indent(level) }}
+{% endmacro %}
+
+{# Output #}
+
+<code>
+{{ render_node(root, 0) }}
+</code>
