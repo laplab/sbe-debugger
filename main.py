@@ -1,5 +1,7 @@
+from jinja2 import Template
+
 from bson.json_util import loads
-from textwrap import indent, dedent
+from textwrap import indent
 from collections import defaultdict
 
 slot_ids = None
@@ -14,19 +16,19 @@ def split_entity_with_id(entity_with_id):
 
 def render_stage(node):
     stage_id, stage_name = split_entity_with_id(node['stageId'])
-    return f'<span class="stage" data-id="{stage_id}">{stage_name}</span>'
+    return f'<span class="stage" data-id="{stage_id}" id="id{stage_id}">{stage_name}</span>'
 
 def render_expr(expr, meaning=''):
     if expr is None:
         return '{}'
     expr_id, expr = split_entity_with_id(expr)
-    return f'<span class="expr" data-id="{expr_id}" data-meaning="{meaning}">{expr}</span>'
+    return f'<span class="expr" data-id="{expr_id}" id="id{expr_id}" data-meaning="{meaning}">{expr}</span>'
 
 def render_slot(slot, meaning=''):
     if slot is None:
         return ''
     slot_id = slot_ids[str(slot)]
-    return f'<span class="slot" data-id="{slot_id}" data-meaning="{meaning}">{slot}</span>'
+    return f'<span class="slot" data-id="{slot_id}" id="id{slot_id}" data-meaning="{meaning}">s{slot}</span>'
 
 def template(string):
     return string.strip(' \n\r\t')
@@ -34,12 +36,12 @@ def template(string):
 def render_traverse(node):
     # TODO laplab: Handle correlated slots.
     return template(f'''
-{render_stage(node)}
-    {render_slot(node['inputSlot'], 'Input value and current array element')}
-    {render_slot(node['outputSlot'], 'Output value')}
-    {render_slot(node['outputSlotInner'], 'Output from the inner side')}
-    {render_expr(node['fold'], 'Fold expression')}
-    {render_expr(node['final'], 'Final expression')}
+{render_stage(node)} \
+{render_slot(node['inputSlot'], 'Input value and current array element')} \
+{render_slot(node['outputSlot'], 'Output value')} \
+{render_slot(node['outputSlotInner'], 'Output from the inner side')} \
+{render_expr(node['fold'], 'Fold expression')} \
+{render_expr(node['final'], 'Final expression')}
 from
 {render_node(node['children'][0], True)}
 in
@@ -75,14 +77,14 @@ def render_coscan(node):
 def render_scan(node):
     # TODO laplab: Handle output slots.
     return template(f'''
-{render_stage(node)}
-    {render_slot(node['recordSlot'], 'Record from storage')}
-    {render_slot(node['recordIdSlot'], 'Record id for the record from storage')}
-    {render_slot(node['seekKeySlot'], 'Record id pointing to the desired record')}
-    {render_slot(node['snapshotIdSlot'], 'Id of a storage snapshot')}
-    {render_slot(node['indexIdSlot'], 'Id of an index which was used to find the document')}
-    {render_slot(node['indexKeySlot'], 'Index key slot')}
-    {render_slot(node['indexKeyPatternSlot'], 'Key pattern of an index which was used to find the document')}
+{render_stage(node)} \
+{render_slot(node['recordSlot'], 'Record from storage')} \
+{render_slot(node['recordIdSlot'], 'Record id for the record from storage')} \
+{render_slot(node['seekKeySlot'], 'Record id pointing to the desired record')} \
+{render_slot(node['snapshotIdSlot'], 'Id of a storage snapshot')} \
+{render_slot(node['indexIdSlot'], 'Id of an index which was used to find the document')} \
+{render_slot(node['indexKeySlot'], 'Index key slot')} \
+{render_slot(node['indexKeyPatternSlot'], 'Key pattern of an index which was used to find the document')} \
     ''')
 
 def render_node(node, bump=False):
@@ -103,7 +105,7 @@ def render_node(node, bump=False):
     return result
 
 def main():
-    with open('../mongo/session.sbe.debugger') as f:
+    with open('../mongo/session.sbe.debugger', 'r') as f:
         tree = None
         frames = []
         for line in f:
@@ -115,9 +117,14 @@ def main():
 
     global slot_ids
     slot_ids = tree['slots']
-    root = tree['stages']
+    rendered_tree = render_node(tree['stages'])
 
-    print(render_node(root, 0))
+    with open('templates/index.html.j2', 'r') as f:
+        template = Template(f.read())
+
+    with open('build/index.html', 'w') as f:
+        rendered_index = template.render(tree=rendered_tree)
+        f.write(rendered_index)
 
 if __name__ == '__main__':
     main()
