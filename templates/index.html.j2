@@ -20,6 +20,18 @@
     Frame <span id="frame-index"></span> / {{ frames | length }}
     <button id="next-frame">Next frame</button>
 
+    <table>
+        <thead>
+            <tr>
+                <th>Expression</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody id="watch-table">
+
+        </tbody>
+    </table>
+
     <script>
         window.frames = {{ frames | tojson }};
         window.values = {{ values | tojson }};

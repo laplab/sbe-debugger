@@ -23,13 +23,13 @@ def render_expr(expr, meaning=''):
     if expr is None:
         return '{}'
     expr_id, expr = split_entity_with_id(expr)
-    return f'<span class="expr pointer" data-id="{expr_id}" id="id{expr_id}" data-meaning="{meaning}">{expr}</span>'
+    return f'<span class="expr pointer" data-id="{expr_id}" data-meaning="{meaning}">{expr}</span>'
 
 def render_slot(slot, meaning=''):
     if slot is None:
         return ''
     slot_id = slot_ids[str(slot)]
-    return f'<span class="slot pointer" data-id="{slot_id}" id="id{slot_id}" data-meaning="{meaning}">s{slot}</span>'
+    return f'<span class="slot pointer" data-id="{slot_id}" data-meaning="{meaning}">s{slot}</span>'
 
 def template(string):
     return string.strip(' \n\r\t')

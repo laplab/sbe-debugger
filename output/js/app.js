@@ -8,9 +8,11 @@ $(function() {
     const valueMeaning = $('#value-meaning');
     const valuePreview = $('#value-preview');
     const frameIndex = $('#frame-index');
+    const watchTable = $('#watch-table');
 
     // State.
     let currentFrame = 0;
+    let watchList = [];
 
     function getValue(id) {
         const valueId = window.frames[currentFrame][valuesIndex][id];
@@ -35,8 +37,32 @@ $(function() {
         valuePreview.text(value);
     }
 
+    function addToWatchList() {
+        const id = $(this).data('id');
+        watchList.push(id);
+
+        const expr = $('<pre/>').append($(this).html());
+        const value = $('<pre/>').attr('id', 'watch' + id);
+        const row = $('<tr/>')
+            .append($('<td/>').append(expr))
+            .append($('<td/>').append(value));
+
+        watchTable.append(row);
+        updateWatchListValues();
+    }
+
+    function updateWatchListValues() {
+        for (let id of watchList) {
+            const value = getValue(id);
+            $('#watch' + id).html(value);
+        }
+    }
+
     $('.slot').hover(displayValuePreview, clearValuePreview);
     $('.expr').hover(displayValuePreview, clearValuePreview);
+
+    $('.slot').click(addToWatchList);
+    $('.expr').click(addToWatchList);
 
     function updateAfterFrameChange() {
         frameIndex.text((currentFrame + 1).toString());
@@ -46,6 +72,8 @@ $(function() {
         const stageId = window.frames[currentFrame][stageIdIndex];
         const className = isAdvanced ? 'stage-advanced' : 'stage-eof';
         $('#id' + stageId).addClass(className);
+
+        updateWatchListValues();
     }
 
     $('#prev-frame').click(function() {
