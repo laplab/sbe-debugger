@@ -6,8 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>SBE Debugger</title>
+
+    <link rel="stylesheet" href="/css/main.css"/>
 </head>
 <body>
     <pre>{{tree}}</pre>
+
+    Value meaning: <code id="value-meaning"></code>
+    <br />
+    Value preview: <code id="value-preview"></code>
+    <br />
+    <button id="prev-frame">Prev frame</button>
+    Frame <span id="frame-index"></span> / {{ frames | length }}
+    <button id="next-frame">Next frame</button>
+
+    <script>
+        window.frames = {{ frames | tojson }};
+        window.values = {{ values | tojson }};
+    </script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

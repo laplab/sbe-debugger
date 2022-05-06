@@ -4,6 +4,7 @@ from bson.json_util import loads
 from textwrap import indent
 from collections import defaultdict
 
+# TODO laplab: Move all global variables and render methods into a class.
 slot_ids = None
 
 def split_entity_with_id(entity_with_id):
@@ -22,13 +23,13 @@ def render_expr(expr, meaning=''):
     if expr is None:
         return '{}'
     expr_id, expr = split_entity_with_id(expr)
-    return f'<span class="expr" data-id="{expr_id}" id="id{expr_id}" data-meaning="{meaning}">{expr}</span>'
+    return f'<span class="expr pointer" data-id="{expr_id}" id="id{expr_id}" data-meaning="{meaning}">{expr}</span>'
 
 def render_slot(slot, meaning=''):
     if slot is None:
         return ''
     slot_id = slot_ids[str(slot)]
-    return f'<span class="slot" data-id="{slot_id}" id="id{slot_id}" data-meaning="{meaning}">s{slot}</span>'
+    return f'<span class="slot pointer" data-id="{slot_id}" id="id{slot_id}" data-meaning="{meaning}">s{slot}</span>'
 
 def template(string):
     return string.strip(' \n\r\t')
@@ -119,11 +120,30 @@ def main():
     slot_ids = tree['slots']
     rendered_tree = render_node(tree['stages'])
 
+    index = 0
+    values = {}
+    rendered_frames = []
+    for frame in frames:
+        rendered_values = {}
+        for entity_id, value in frame['values'].items():
+            value = value.strip()
+            if value not in values:
+                values[value] = index
+                index += 1
+            rendered_values[entity_id] = values[value]
+        rendered_frames.append([
+            frame['isAdvanced'],
+            frame['stage'],
+            rendered_values,
+        ])
+
+    unique_values = [value for value, _ in sorted(values.items(), key=lambda x: x[1])]
+
     with open('templates/index.html.j2', 'r') as f:
         template = Template(f.read())
 
-    with open('build/index.html', 'w') as f:
-        rendered_index = template.render(tree=rendered_tree)
+    with open('output/index.html', 'w') as f:
+        rendered_index = template.render(tree=rendered_tree, frames=rendered_frames, values=unique_values)
         f.write(rendered_index)
 
 if __name__ == '__main__':
