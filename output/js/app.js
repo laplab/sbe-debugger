@@ -12,7 +12,7 @@ $(function() {
 
     // State.
     let currentFrame = 0;
-    let watchList = [];
+    let watchList = new Set();
 
     function getValue(id) {
         const valueId = window.frames[currentFrame][valuesIndex][id];
@@ -39,7 +39,10 @@ $(function() {
 
     function addToWatchList() {
         const id = $(this).data('id');
-        watchList.push(id);
+        if (watchList.has(id)) {
+            return;
+        }
+        watchList.add(id);
 
         const expr = $('<pre/>').append($(this).html());
         const value = $('<pre/>').attr('id', 'watch' + id);
