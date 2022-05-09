@@ -7,32 +7,57 @@
 
     <title>SBE Debugger</title>
 
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/css/main.css"/>
 </head>
 <body>
-    <pre>{{tree}}</pre>
+    <div class="container main-container">
 
-    Value meaning: <code id="value-meaning"></code>
-    <br />
-    Value preview: <code id="value-preview"></code>
-    <br />
-    <button id="prev-frame">Prev frame</button>
-    Frame <span id="frame-index"></span> / {{ frames | length }}
-    <button id="next-frame">Next frame</button>
-    <br />
-    <b>Note:</b> Slots show the current value, but all expressions show the <i>last computed</i> value.
+        <h1 class="text-center">SBE Debugger</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Expression</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody id="watch-table">
+        <hr />
 
-        </tbody>
-    </table>
+        <div class="container w-100">
+            <div class="row">
+                <div class="col-6">
+                    <pre>{{tree}}</pre>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-outline-dark shadow-none" id="prev-frame">Prev frame</button>
+                    Frame <span id="frame-index"></span> / {{ frames | length }}
+                    <button type="button" class="btn btn-outline-dark shadow-none"  id="next-frame">Next frame</button>
+
+                    <br />
+                    Value meaning: <code id="value-meaning"></code>
+                    <br />
+                    Value preview: <code id="value-preview"></code>
+
+                    <h5>Watch list</h5>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Expression</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="watch-table">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <h5>Tutorial</h5>
+        <ol>
+            <li>Hover on slot or expression to see its value and meaning</li>
+            <li>Click on slot or expression to add it to the "Watch list"</li>
+            <li>Use "Prev/Next frame" buttons to navigate through the plan execution</li>
+            <li><b>Note:</b> Slots show the current value, but all expressions show the <i>last computed</i> value.</li>
+        </ol>
+    </div>
 
     <script>
         window.frames = {{ frames | tojson }};

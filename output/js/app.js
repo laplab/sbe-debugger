@@ -44,8 +44,8 @@ $(function() {
         }
         watchList.add(id);
 
-        const expr = $('<pre/>').append($(this).html());
-        const value = $('<pre/>').attr('id', 'watch' + id);
+        const expr = $('<code/>').append($(this).html());
+        const value = $('<code/>').attr('id', 'watch' + id);
         const row = $('<tr/>')
             .append($('<td/>').append(expr))
             .append($('<td/>').append(value));
